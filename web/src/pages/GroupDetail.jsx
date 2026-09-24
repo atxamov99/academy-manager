@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ArrowLeftRight, Pencil, History, Trash2 } from 'lucide-react';
 import { api, DAYS, DIRECTIONS, LEVELS, LANGS, REASONS, MENTOR_LEVELS, fmtDay, fmtDate, todayStr } from '../lib/api';
-import { Button, Spinner, Badge, Avatar, Empty } from '../components/ui';
+import { Button, Spinner, Badge, Avatar, Empty, QueryGate } from '../components/ui';
 import ReplaceFlow from '../components/ReplaceFlow';
 import { GroupForm } from '../components/Forms';
 
@@ -18,7 +18,7 @@ export default function GroupDetail() {
   const cancel = useMutation({ mutationFn: (rid) => api(`/replacements/${rid}/cancel`, { method: 'POST' }), onSuccess: () => qc.invalidateQueries() });
   const archive = useMutation({ mutationFn: () => api(`/groups/${id}`, { method: 'DELETE' }), onSuccess: () => { qc.invalidateQueries(); nav('/groups'); } });
 
-  if (group.isLoading) return <Spinner />;
+  if (group.isLoading || group.isError || !group.data) return <QueryGate query={group}>{() => null}</QueryGate>;
   const g = group.data;
   const today = todayStr();
 

@@ -5,14 +5,22 @@ export class ApiError extends Error {
   }
 }
 
+const OFFLINE = "Server ishlamayapti. Terminalda loyiha papkasida `npm run dev` ni ishga tushiring.";
+
 export async function api(path, { method = 'GET', body } = {}) {
-  const res = await fetch(`/api${path}`, {
-    method,
-    credentials: 'include',
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json().catch(() => ({}));
+  let res;
+  try {
+    res = await fetch(`/api${path}`, {
+      method,
+      credentials: 'include',
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new ApiError(OFFLINE, 0);
+  }
+  const data = await res.json().catch(() => null);
+  if (data === null) throw new ApiError(OFFLINE, res.status); // Vite proxy: backend o'chiq
   if (!res.ok) {
     if (res.status === 401 && !path.startsWith('/auth')) window.dispatchEvent(new Event('am:logout'));
     throw new ApiError(data.error || 'Xatolik yuz berdi', res.status);

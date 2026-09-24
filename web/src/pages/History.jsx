@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeftRight, History as HistoryIcon } from 'lucide-react';
 import { api, REASONS, fmtDay } from '../lib/api';
-import { PageHeader, Spinner, Badge, Empty, Stat, Chips, Avatar } from '../components/ui';
+import { PageHeader, Spinner, Badge, Empty, Stat, Chips, Avatar, QueryGate } from '../components/ui';
 
 function TopList({ title, hint, rows }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
@@ -27,7 +27,7 @@ export default function History() {
   const [type, setType] = useState('all');
   const reps = useQuery({ queryKey: ['replacements', { type }], queryFn: () => api(`/replacements${type === 'all' ? '' : `?type=${type}`}`) });
 
-  if (report.isLoading) return <Spinner />;
+  if (report.isLoading || report.isError || !report.data) return <QueryGate query={report}>{() => null}</QueryGate>;
   const r = report.data;
   const reasons = Object.entries(r.byReason).sort((a, b) => b[1] - a[1]);
 
@@ -52,7 +52,7 @@ export default function History() {
           <h2 className="font-semibold text-sm">Barcha almashtirishlar</h2>
           <Chips options={{ all: 'Hammasi', temporary: 'Bir dars', permanent: 'Doimiy' }} value={type} onChange={setType} />
         </div>
-        {reps.isLoading ? <Spinner /> : !reps.data?.length ? <Empty icon={HistoryIcon} title="Hali almashtirish yo'q" /> : (
+        {reps.isLoading || reps.isError ? <QueryGate query={reps}>{() => null}</QueryGate> : !reps.data?.length ? <Empty icon={HistoryIcon} title="Hali almashtirish yo'q" /> : (
           <div className="divide-y divide-zinc-100">
             {reps.data.map((x) => (
               <div key={x._id} className={`px-5 py-3 ${x.cancelled ? 'opacity-40' : ''}`}>

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { TriangleAlert, ArrowLeftRight, Clock, CalendarOff, ChevronRight } from 'lucide-react';
 import { api, fmtDay, fmtDate, DIRECTIONS, REASONS, DAYS } from '../lib/api';
-import { PageHeader, Stat, Spinner, Empty, Badge, Button, Avatar } from '../components/ui';
+import { PageHeader, Stat, Spinner, Empty, Badge, Button, Avatar, QueryGate } from '../components/ui';
 import ReplaceFlow from '../components/ReplaceFlow';
 
 export default function Dashboard() {
@@ -12,7 +12,7 @@ export default function Dashboard() {
   const groups = useQuery({ queryKey: ['groups'], queryFn: () => api('/groups') });
   const [replace, setReplace] = useState(null);
 
-  if (dash.isLoading) return <Spinner />;
+  if (dash.isLoading || dash.isError || !dash.data) return <QueryGate query={dash}>{() => null}</QueryGate>;
   const d = dash.data;
   const maxHours = Math.max(1, ...d.loads.map((l) => l.hours));
   const openReplace = (n) => {

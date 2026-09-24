@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Search, Users } from 'lucide-react';
 import { api, DIRECTIONS, MENTOR_LEVELS, fmtDay } from '../lib/api';
-import { PageHeader, Button, Spinner, Badge, Empty, Avatar, Chips } from '../components/ui';
+import { PageHeader, Button, Spinner, Badge, Empty, Avatar, Chips, QueryGate } from '../components/ui';
 import { MentorForm } from '../components/Forms';
 
 export default function Mentors() {
@@ -28,7 +28,7 @@ export default function Mentors() {
         <Chips options={{ all: 'Hammasi', ...DIRECTIONS }} value={dir} onChange={setDir} />
       </div>
 
-      {mentors.isLoading ? <Spinner /> : list.length === 0 ? <div className="card"><Empty icon={Users} title="Mentor topilmadi" /></div> : (
+      {mentors.isLoading || mentors.isError ? <QueryGate query={mentors}>{() => null}</QueryGate> : list.length === 0 ? <div className="card"><Empty icon={Users} title="Mentor topilmadi" /></div> : (
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {list.map((m) => (
             <Link key={m._id} to={`/mentors/${m._id}`} className="card p-5 hover:border-zinc-300 hover:shadow-sm transition">

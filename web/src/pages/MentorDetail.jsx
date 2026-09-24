@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { ArrowLeft, Pencil, CalendarOff, Phone, Trash2 } from 'lucide-react';
 import { api, DAYS_SHORT, DIRECTIONS, MENTOR_LEVELS, LANGS, fmtDay, fmtDate } from '../lib/api';
-import { Button, Spinner, Badge, Avatar, Empty, Stat } from '../components/ui';
+import { Button, Spinner, Badge, Avatar, Empty, Stat, QueryGate } from '../components/ui';
 import { MentorForm, AbsenceForm } from '../components/Forms';
 
 const HOURS = Array.from({ length: 13 }, (_, i) => 8 + i); // 08:00–20:00
@@ -51,7 +51,7 @@ export default function MentorDetail() {
   const [tab, setTab] = useState('upcoming');
   const delAbs = useMutation({ mutationFn: (aid) => api(`/absences/${aid}`, { method: 'DELETE' }), onSuccess: () => qc.invalidateQueries() });
 
-  if (ov.isLoading) return <Spinner />;
+  if (ov.isLoading || ov.isError || !ov.data) return <QueryGate query={ov}>{() => null}</QueryGate>;
   const d = ov.data;
   const m = d.mentor;
   const rows = tab === 'upcoming' ? d.upcoming : d.history;

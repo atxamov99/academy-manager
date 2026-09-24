@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, Search, BookOpen } from 'lucide-react';
 import { api, DIRECTIONS, LEVELS, DAYS_SHORT } from '../lib/api';
-import { PageHeader, Button, Spinner, Badge, Empty, Avatar, Chips } from '../components/ui';
+import { PageHeader, Button, Spinner, Badge, Empty, Avatar, Chips, QueryGate } from '../components/ui';
 import { GroupForm } from '../components/Forms';
 
 export default function Groups() {
@@ -28,7 +28,7 @@ export default function Groups() {
         <Chips options={{ all: 'Hammasi', ...DIRECTIONS }} value={dir} onChange={setDir} />
       </div>
 
-      {groups.isLoading ? <Spinner /> : (
+      {groups.isLoading || groups.isError ? <QueryGate query={groups}>{() => null}</QueryGate> : (
         <div className="card overflow-hidden">
           {list.length === 0 ? <Empty icon={BookOpen} title="Guruh topilmadi" /> : (
             <div className="overflow-x-auto">

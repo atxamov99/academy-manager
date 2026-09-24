@@ -28,6 +28,10 @@ with sync_playwright() as p:
     row.get_by_role("button", name="Mentor topish").click()
     expect(page.get_by_role("heading", name="Mentorni almashtirish")).to_be_visible()
     expect(page.get_by_text("Eng mos")).to_be_visible()
+    # Modal fon qatlami butun ekranni qoplashi kerak (bug: <main> transform ichida qolib ketgan edi)
+    ov = page.locator("div.fixed.inset-0").first.bounding_box()
+    vw = page.viewport_size
+    assert ov["x"] == 0 and ov["y"] == 0 and ov["width"] == vw["width"] and ov["height"] == vw["height"], ov
     page.get_by_text("Nega boshqalar mos emas").click()
     page.screenshot(path=f"{OUT}/03-replace-modal.png")
 
@@ -48,6 +52,12 @@ with sync_playwright() as p:
     # Mentorlar: statistikalar
     page.click("a:has-text('Mentorlar')")
     expect(page.get_by_text("shu oy").first).to_be_visible()
+    page.get_by_role("button", name="Yangi mentor").click()
+    ov = page.locator("div.fixed.inset-0").first.bounding_box()
+    assert ov["height"] == page.viewport_size["height"], ov
+    expect(page.get_by_role("heading", name="Yangi mentor")).to_be_in_viewport()
+    page.screenshot(path=f"{OUT}/06b-mentor-form.png")
+    page.keyboard.press("Escape")
     page.screenshot(path=f"{OUT}/06-mentors.png", full_page=True)
     page.click(f"a:has-text('{name}')")
     expect(page.get_by_text("Haftalik dars jadvali")).to_be_visible()

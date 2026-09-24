@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import clsx from 'clsx';
-import { X } from 'lucide-react';
+import { X, ServerCrash, RotateCw } from 'lucide-react';
 import { initials } from '../lib/api';
 
 export function Button({ variant = 'primary', size = 'md', className, ...p }) {
@@ -89,7 +90,8 @@ export function Modal({ open, onClose, title, subtitle, children, width = 560 })
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
   if (!open) return null;
-  return (
+  // Portal: <main>dagi animatsiya (transform) fixed modalni o'z ichiga qamab qo'ymasligi uchun
+  return createPortal(
     <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-zinc-900/30 backdrop-blur-[2px]" onMouseDown={onClose}>
       <div className="card fade-up w-full max-h-[90vh] overflow-auto shadow-2xl shadow-zinc-900/10" style={{ maxWidth: width }} onMouseDown={(e) => e.stopPropagation()}>
         <div className="sticky top-0 z-10 bg-white flex items-start justify-between gap-4 px-6 pt-5 pb-4 border-b border-zinc-100">
@@ -103,7 +105,8 @@ export function Modal({ open, onClose, title, subtitle, children, width = 560 })
         </div>
         <div className="px-6 py-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -147,4 +150,19 @@ export function ErrorNote({ error }) {
 
 export function Spinner() {
   return <div className="py-16 grid place-items-center"><div className="size-6 rounded-full border-2 border-zinc-200 border-t-zinc-900 animate-spin" /></div>;
+}
+
+/** So'rov holati: yuklanmoqda / xato (server o'chiq bo'lsa ham sahifa yiqilmaydi) */
+export function QueryGate({ query, children }) {
+  if (query.isLoading) return <Spinner />;
+  if (query.isError || !query.data)
+    return (
+      <div className="card py-14 text-center">
+        <ServerCrash className="mx-auto size-9 text-zinc-300" strokeWidth={1.5} />
+        <div className="mt-3 text-sm font-semibold">Ma'lumotni yuklab bo'lmadi</div>
+        <div className="mt-1 text-xs text-zinc-500 max-w-sm mx-auto">{query.error?.message || 'Server javob bermadi'}</div>
+        <Button variant="outline" size="sm" className="mt-5" onClick={() => query.refetch()}><RotateCw className="size-3.5" />Qayta urinish</Button>
+      </div>
+    );
+  return children(query.data);
 }
