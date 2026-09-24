@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+/* Bir tonli dizayn: neytral (zinc) + bitta aksent (MARS to'q sariq) */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-accent: #f97316;
+  --color-accent-soft: #fff4ec;
+  --color-accent-ink: #c2410c;
+}
+
+html, body, #root { height: 100%; }
+body {
+  @apply bg-zinc-50 text-zinc-900 antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+.card { @apply bg-white border border-zinc-200/80 rounded-2xl; }
+.label { @apply block text-xs font-medium text-zinc-500 mb-1.5; }
+.input {
+  @apply w-full h-10 px-3 rounded-xl border border-zinc-200 bg-white text-sm outline-none transition
+    focus:border-zinc-900 focus:ring-4 focus:ring-zinc-900/5 placeholder:text-zinc-400;
+}
+textarea.input { @apply h-auto py-2.5; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fade-up .25s ease-out both; }
